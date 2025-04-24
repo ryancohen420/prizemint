@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "@/components/Web3Provider";
 import NavBar from "@/components/NavBar";
-import AutoReconnect from "@/components/AutoReconnect";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({
@@ -25,7 +24,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Web3Provider>
-          <AutoReconnect /> {/* 👈 auto-reconnect mobile WalletConnect */}
           <NavBar /> {/* ✅ shared nav here */}
           {children}
         </Web3Provider>
