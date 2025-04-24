@@ -9,6 +9,7 @@ import {
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
+import { http } from "wagmi";
 
 const config = getDefaultConfig({
   appName: "PrizeMint",
