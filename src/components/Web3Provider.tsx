@@ -8,6 +8,7 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { WagmiProvider } from "wagmi";
 
 const config = getDefaultConfig({
   appName: "PrizeMint",
