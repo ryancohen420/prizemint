@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
