@@ -8,9 +8,9 @@ import { SiweMessage } from "siwe";
 
 const prisma = new PrismaClient();
 
-// Our central NextAuth configuration
+// Central NextAuth configuration
 export const authOptions = {
-  adapter: PrismaAdapter(prisma), // Tells NextAuth how to interact with our DB
+  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: "Ethereum",
@@ -50,7 +50,7 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as "jwt", // ✅ Literal union type cast
   },
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
@@ -64,4 +64,4 @@ export const authOptions = {
       return token;
     },
   },
-}
+};

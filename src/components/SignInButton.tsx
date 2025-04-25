@@ -2,16 +2,25 @@
 
 import { useSIWE } from "@/lib/siwe";
 import { useAccount, useEnsName } from "wagmi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { FaCopy, FaChevronDown } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
 export default function SignInButton() {
+  // ✅ All hooks called FIRST, before any early return
+  const [hasMounted, setHasMounted] = useState(false);
   const { isSignedIn, isSigningIn, signIn, signOut } = useSIWE();
   const { isConnected, address } = useAccount();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: ensName } = useEnsName({ address: address as `0x${string}` });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // ✅ Now it's safe to conditionally return
+  if (!hasMounted) return null;
 
   const shortAddr = address
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -24,12 +33,10 @@ export default function SignInButton() {
     }
   };
 
-  // ✅ Not connected to wallet yet
   if (!isConnected) {
     return <ConnectButton />;
   }
 
-  // ✅ Connected to wallet but not signed in
   if (!isSignedIn) {
     return (
       <button
@@ -42,7 +49,6 @@ export default function SignInButton() {
     );
   }
 
-  // ✅ Signed in — show dropdown
   return (
     <div className="relative text-white">
       <button
