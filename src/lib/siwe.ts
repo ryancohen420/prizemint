@@ -7,7 +7,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 export function useSIWE() {
   const { data: session } = useSession();
   const { isConnected, address, chain } = useAccount();
-  const { connectAsync, connectors, error } = useConnect();
+  const { connectAsync, connectors } = useConnect();
   const { signMessageAsync } = useSignMessage();
   const { disconnect } = useDisconnect();
 

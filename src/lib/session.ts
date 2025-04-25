@@ -1,5 +1,7 @@
 // src/lib/session.ts
 import type { NextAuthOptions } from "next-auth";
+import type { Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
@@ -24,7 +26,7 @@ export const authOptions: NextAuthOptions = {
           const result = await siwe.verify({
             signature: credentials?.signature || "",
             domain: new URL(process.env.NEXTAUTH_URL!).host,
-            nonce: (req as any).cookies?.get("siwe_nonce")?.value,
+            nonce: (req as { cookies?: Map<string, { value: string }> }).cookies?.get("siwe_nonce")?.value,
           });
       
           if (!result.success) return null;
@@ -50,14 +52,13 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt", // So we can store the user info in a JWT rather than DB sessions
   },
   callbacks: {
-    async session({ session, token }) {
-      // Extend session with address
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
         session.address = token.sub as string;
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) token.sub = user.id;
       return token;
     },

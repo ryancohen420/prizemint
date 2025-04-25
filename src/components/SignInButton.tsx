@@ -8,7 +8,7 @@ import { FaCopy, FaChevronDown } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
 export default function SignInButton() {
-  const { isSignedIn, isSigningIn, signIn, signOut, session } = useSIWE();
+  const { isSignedIn, isSigningIn, signIn, signOut } = useSIWE();
   const { isConnected, address } = useAccount();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: ensName } = useEnsName({ address: address as `0x${string}` });

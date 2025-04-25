@@ -32,12 +32,14 @@ export async function POST(req: NextRequest) {
 
 
     return NextResponse.json({ message });
-  } catch (error: any) {
-    console.error("❌ Error generating SIWE message:", error);
+  } catch (error: unknown) {
+    const errMsg =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error("❌ Error generating SIWE message:", errMsg);
     return NextResponse.json(
       {
         error: "Failed to generate SIWE message",
-        detail: error?.message || "Unknown",
+        detail: errMsg,
       },
       { status: 500 }
     );
