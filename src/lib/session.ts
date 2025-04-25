@@ -50,8 +50,8 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: "jwt" as "jwt", // ✅ Literal union type cast
-  },
+    strategy: "jwt",
+  } as const,
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
