@@ -50,17 +50,38 @@ export const authOptions = {
     }),
   ],
   session: {
-    strategy: "jwt",
-  } as const,
+    strategy: "jwt" as const,
+  },
   callbacks: {
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: JWT;
+      user?: User;
+      trigger?: "update";
+      newSession?: Session;
+    }): Promise<Session> {
       if (session.user) {
-        session.address = token.sub as string;
+        session.user.id = token.sub as string;
+        session.user.address = token.address as string;
       }
+      session.address = token.address as string;
       return session;
     },
-    async jwt({ token, user }: { token: JWT; user?: User }) {
-      if (user) token.sub = user.id;
+
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT;
+      user?: User;
+    }): Promise<JWT> {
+      if (user) {
+        token.sub = user.id;
+        token.address = user.address;
+      }
       return token;
     },
   },
