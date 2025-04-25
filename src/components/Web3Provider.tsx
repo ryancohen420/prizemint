@@ -14,6 +14,8 @@ import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { useIsMounted } from "./hooks/useIsMounted"; // adjust path as needed
+
 const chains = [mainnet, polygon, optimism, arbitrum] as const;
 
 const config = getDefaultConfig({
@@ -29,15 +31,19 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {
+  const mounted = useIsMounted();
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({ accentColor: "#22c55e" })}
-          modalSize="compact"
-        >
-          {children}
-        </RainbowKitProvider>
+        {mounted && (
+          <RainbowKitProvider
+            theme={darkTheme({ accentColor: "#22c55e" })}
+            modalSize="compact"
+          >
+            {children}
+          </RainbowKitProvider>
+        )}
       </QueryClientProvider>
     </WagmiProvider>
   );
