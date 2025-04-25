@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { SiweMessage } from "siwe";
 import { useAccount, useSignMessage, useDisconnect, useConnect } from "wagmi";
 import { signIn, signOut, useSession } from "next-auth/react";
 

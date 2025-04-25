@@ -1,15 +1,16 @@
 "use client";
 
 import { useSIWE } from "@/lib/siwe";
-import { useEnsName } from "wagmi";
+import { useAccount, useEnsName } from "wagmi";
 import { useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { FaCopy, FaChevronDown } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 
 export default function SignInButton() {
-  const { isSignedIn, signIn, signOut, session } = useSIWE();
+  const { isSignedIn, isSigningIn, signIn, signOut, session } = useSIWE();
+  const { isConnected, address } = useAccount();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const address = session?.address;
   const { data: ensName } = useEnsName({ address: address as `0x${string}` });
 
   const shortAddr = address
@@ -23,17 +24,25 @@ export default function SignInButton() {
     }
   };
 
+  // ✅ Not connected to wallet yet
+  if (!isConnected) {
+    return <ConnectButton />;
+  }
+
+  // ✅ Connected to wallet but not signed in
   if (!isSignedIn) {
     return (
       <button
         onClick={signIn}
-        className="bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition"
+        disabled={isSigningIn}
+        className="bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition disabled:opacity-50"
       >
-        Sign In
+        {isSigningIn ? "Signing..." : "Sign In"}
       </button>
     );
   }
 
+  // ✅ Signed in — show dropdown
   return (
     <div className="relative text-white">
       <button
