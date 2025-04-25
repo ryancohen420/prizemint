@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import SignInButton from "./SignInButton"; // ✅ CORRECT for default export
 
 export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,7 +39,7 @@ export default function NavBar() {
 
       {/* Right Side */}
       <div className="flex items-center gap-2">
-        <ConnectButton />
+        <SignInButton />
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden ml-2 p-2 rounded bg-white/10 hover:bg-white/20"

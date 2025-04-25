@@ -1,0 +1,31 @@
+// Updated schema.prisma with optional ownerId on Raffle
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  address       String   @unique
+  createdAt     DateTime @default(now())
+  lastLogin     DateTime @updatedAt
+  raffles       Raffle[] // optional relationship
+}
+
+model Raffle {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  imageUrl      String
+  priceEth      Float
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  ownerId       String?    // made optional
+  owner         User?      @relation(fields: [ownerId], references: [id])
+}

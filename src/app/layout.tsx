@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Web3Provider } from "@/components/Web3Provider";
+
+import { SessionClientProvider } from "@/components/SessionClientProvider";
+import { Web3ClientProvider } from "@/components/Web3ClientProvider";
 import NavBar from "@/components/NavBar";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -23,10 +25,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Web3Provider>
-          <NavBar /> {/* ✅ shared nav here */}
-          {children}
-        </Web3Provider>
+        <SessionClientProvider>
+          <Web3ClientProvider>
+            <NavBar /> {/* ✅ SignInButton is inside here */}
+            {children}
+          </Web3ClientProvider>
+        </SessionClientProvider>
       </body>
     </html>
   );
