@@ -20,7 +20,6 @@ if (typeof window !== "undefined") {
   };
 }
 
-import { useMemo } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 import {
   RainbowKitProvider,

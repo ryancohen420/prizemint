@@ -1,3 +1,4 @@
+// src/lib/session.ts
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider                from "next-auth/providers/credentials";
 import { PrismaAdapter }                 from "@next-auth/prisma-adapter";
@@ -14,13 +15,15 @@ export const authOptions: NextAuthOptions = {
         message:   { label: "Message",   type: "text" },
         signature: { label: "Signature", type: "text" },
       },
-      async authorize(credentials) {
-        if (!credentials) return null;
+      // <-- typed parameters to eliminate `any`
+      async authorize(
+        credentials: { message?: string; signature?: string } | undefined
+      ): Promise<{ id: string; address: string; username?: string | null } | null> {
+        if (!credentials?.message || !credentials?.signature) return null;
         try {
           const siwe = new SiweMessage(credentials.message);
           const { success, data } = await siwe.verify({
             signature: credentials.signature,
-            // lookup the persisted nonce
             nonce: (
               await prisma.nonce.findUniqueOrThrow({
                 where: { id: siwe.nonce },
@@ -33,14 +36,15 @@ export const authOptions: NextAuthOptions = {
           await prisma.nonce.delete({ where: { id: data.nonce } });
 
           const address = data.address.toLowerCase();
-          // upsert the user record
+          // upsert the user record (username stays null until they set it)
           const user = await prisma.user.upsert({
             where:  { address },
             create: { address },
             update: {},
           });
-          return user;
-        } catch {
+          return { id: user.id, address: user.address, username: user.username };
+        } catch (err: unknown) {
+          console.error("SIWE authorize error", err);
           return null;
         }
       },
@@ -52,16 +56,15 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.sub      = user.id;
         token.address  = user.address;
-        token.username = (user as any).username ?? null;
+        token.username = user.username ?? null;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id       = token.sub as string;
-        session.user.address  = token.address as string;
-        session.user.username = token.username as string | null;
-      }
+      // session.user is guaranteed by our next-auth.d.ts
+      session.user!.id       = token.sub as string;
+      session.user!.address  = token.address as string;
+      session.user!.username = token.username as string | null;
       return session;
     },
   },

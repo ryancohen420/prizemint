@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react"; // ← new
 import SignInButton from "./SignInButton";
 
 export default function NavBar() {
-  const { data: session, status } = useSession(); // ← new
+  const { status } = useSession();
   const signedIn = status === "authenticated"; // ← new
 
   const [menuOpen, setMenuOpen] = useState(false);
