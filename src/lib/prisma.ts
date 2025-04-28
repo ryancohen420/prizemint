@@ -1,10 +1,12 @@
 // src/lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
 
+/* eslint-disable no-var */
 declare global {
   // allow global var across hot-reloads in dev
   var __globalPrisma: PrismaClient | undefined;
 }
+/* eslint-enable no-var */
 
 const prisma =
   global.__globalPrisma ||
