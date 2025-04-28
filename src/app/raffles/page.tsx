@@ -1,45 +1,104 @@
-// src/app/raffles/page.tsx
-import { PrismaClient, Raffle } from "@prisma/client";
+"use client";
 
-export default async function RafflesPage() {
-  let raffles: Raffle[] = [];
+import { useEffect, useState } from "react";
+import Link from "next/link"; // ✅ ADD THIS
 
-  if (process.env.DATABASE_URL) {
-    const prisma = new PrismaClient();
-    raffles = await prisma.raffle.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-  } else {
-    console.warn("⚠️ Skipping DB fetch: DATABASE_URL not set");
+type Raffle = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  ticketSupply: number;
+  ticketsSold: number;
+  priceEth: number;
+  isActive: boolean;
+  createdAt: string;
+  endsAt: string | null;
+  owner: {
+    address: string;
+  } | null;
+};
+
+export default function MarketplacePage() {
+  const [raffles, setRaffles] = useState<Raffle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/raffles")
+      .then((res) => res.json())
+      .then((data) => {
+        setRaffles(data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="p-8">Loading raffles…</div>;
+  }
+
+  if (raffles.length === 0) {
+    return (
+      <div className="p-8 text-center space-y-4">
+        <h1 className="text-3xl font-bold mb-4">Browse Raffles</h1>
+        <p className="text-muted">No raffles available right now.</p>
+      </div>
+    );
   }
 
   return (
-    <main className="min-h-screen bg-dark text-light px-6 py-10">
-      <h1 className="text-3xl font-bold mb-6 text-primary">Browse</h1>
+    <div className="p-8 space-y-8">
+      <h1 className="text-3xl font-bold mb-6">Browse Raffles</h1>
 
-      {raffles.length === 0 && (
-        <p className="text-muted">No raffles available (DB disabled)</p>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {raffles.map((raffle) => (
-          <div
+          <Link
             key={raffle.id}
-            className="bg-light rounded-xl p-4 shadow-md hover:shadow-secondary/40 transition"
+            href={`/raffles/${raffle.id}`}
+            className="border border-muted rounded-xl overflow-hidden shadow-lg bg-light flex flex-col hover:scale-105 transform transition duration-300"
           >
-            <img
-              src={raffle.imageUrl}
-              alt={raffle.title}
-              className="rounded-lg w-full h-48 object-cover mb-4"
-            />
-            <h2 className="text-xl font-semibold mb-2 text-dark">
-              {raffle.title}
-            </h2>
-            <p className="text-sm text-mid mb-2">{raffle.description}</p>
-            <p className="text-primary font-bold">{raffle.priceEth} ETH</p>
-          </div>
+            {raffle.imageUrl && (
+              <img
+                src={raffle.imageUrl}
+                alt={raffle.title}
+                className="h-48 w-full object-cover"
+              />
+            )}
+            <div className="p-4 flex flex-col flex-grow space-y-2">
+              <h2 className="text-xl font-bold">{raffle.title}</h2>
+
+              <div className="text-mid text-sm">
+                🎟️ {raffle.ticketsSold}/{raffle.ticketSupply} tickets sold
+              </div>
+
+              <div className="text-mid text-sm">
+                🪙 {raffle.priceEth} ETH per ticket
+              </div>
+
+              <div className="text-mid text-sm break-all">
+                👤{" "}
+                {raffle.owner?.address
+                  ? shortenAddress(raffle.owner.address)
+                  : "Unknown"}
+              </div>
+
+              <div className="text-sm text-muted mt-auto">
+                {raffle.isActive
+                  ? raffle.endsAt
+                    ? `⏰ Ends: ${new Date(raffle.endsAt).toLocaleString()}`
+                    : "Ongoing"
+                  : "Ended"}
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
-    </main>
+    </div>
   );
+}
+
+function shortenAddress(addr: string) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
 }

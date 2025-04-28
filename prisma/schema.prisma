@@ -26,14 +26,21 @@ model Nonce {
 
 /// A collectible raffle
 model Raffle {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  imageUrl    String
-  priceEth    Float
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  imageUrl      String
+  priceEth      Float
+  ticketSupply  Int      @default(0)
+  ticketsSold   Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  endsAt        DateTime?
+  winnerId      String?
 
-  ownerId     String?
-  owner       User?    @relation(fields: [ownerId], references: [id])
+  ownerId       String?
+  owner         User?    @relation(fields: [ownerId], references: [id])
 }
+
+

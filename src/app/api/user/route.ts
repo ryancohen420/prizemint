@@ -1,4 +1,3 @@
-// src/app/api/user/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/session";
@@ -11,7 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const user = await prisma.user.findUnique({
-    where:  { id: session.user.id },
+    where: { id: session.user.id },
     select: { id: true, address: true, username: true },
   });
   return NextResponse.json(user);
@@ -23,7 +22,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // parse JSON into unknown, then type‐narrow
   let body: unknown;
   try {
     body = await request.json();
@@ -35,9 +33,14 @@ export async function PUT(request: Request) {
     typeof (body as { username?: unknown }).username === "string"
       ? (body as { username: string }).username.trim()
       : "";
+
   if (!username) {
+    return NextResponse.json({ error: "Username must be non-empty" }, { status: 400 });
+  }
+
+  if (username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username)) {
     return NextResponse.json(
-      { error: "Username must be non-empty" },
+      { error: "Username must be alphanumeric/underscores only, max 20 characters." },
       { status: 400 }
     );
   }
@@ -50,14 +53,8 @@ export async function PUT(request: Request) {
     });
     return NextResponse.json(updated);
   } catch (err: unknown) {
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError &&
-      err.code === "P2002"
-    ) {
-      return NextResponse.json(
-        { error: "That username is already taken." },
-        { status: 409 }
-      );
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return NextResponse.json({ error: "That username is already taken." }, { status: 409 });
     }
     console.error(err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

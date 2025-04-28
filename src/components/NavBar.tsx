@@ -47,6 +47,11 @@ export default function NavBar() {
           My Raffles
         </Link>
         {signedIn && (
+          <Link href="/create-raffle" className="hover:text-primary transition">
+            Create Raffle
+          </Link>
+        )}
+        {signedIn && (
           <Link href="/profile" className="hover:text-primary transition">
             Profile
           </Link>
@@ -94,6 +99,15 @@ export default function NavBar() {
           >
             My Raffles
           </Link>
+          {signedIn && (
+            <Link
+              href="/create-raffle"
+              className="hover:text-primary transition"
+              onClick={() => setMenuOpen(false)}
+            >
+              Create Raffle
+            </Link>
+          )}
           {signedIn && (
             <Link
               href="/profile"

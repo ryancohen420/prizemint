@@ -1,92 +1,127 @@
 "use client";
 
-const mockMyRaffles = [
-  {
-    id: "1",
-    title: "Holo Charizard - 1st Edition",
-    status: "pending",
-    image: "https://images.pokemontcg.io/base1/4_hires.png",
-  },
-  {
-    id: "2",
-    title: "Pikachu Plush",
-    status: "lost",
-    image: "https://i.imgur.com/NZtGSkO.png",
-  },
-  {
-    id: "3",
-    title: "GameBoy Color - Lime Green",
-    status: "won",
-    image: "https://i.imgur.com/7zUw6Jz.png",
-  },
-];
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import Link from "next/link"; // ✅ ADD THIS
 
-function getStatusBadge(status: string) {
-  switch (status) {
-    case "pending":
-      return (
-        <span className="text-secondary font-semibold">⏳ Awaiting Draw</span>
-      );
-    case "won":
-      return <span className="text-secondary font-semibold">🏆 You Won!</span>;
-    case "lost":
-      return <span className="text-dark">❌ Not Won</span>;
-    default:
-      return null;
+type Raffle = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  ticketSupply: number;
+  ticketsSold: number;
+  priceEth: number;
+  isActive: boolean;
+  createdAt: string;
+  endsAt: string | null;
+  owner: {
+    address: string;
+  } | null;
+};
+
+export default function MyRafflesPage() {
+  const { data: session, status } = useSession();
+  const signedIn = status === "authenticated";
+  const [raffles, setRaffles] = useState<Raffle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    fetch("/api/raffles/mine")
+      .then((res) => res.json())
+      .then((data) => {
+        setRaffles(data || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, [signedIn]);
+
+  if (status === "loading" || loading) {
+    return <div className="p-8">Loading...</div>;
   }
-}
 
-export default function MyRaffles() {
+  if (!signedIn) {
+    return (
+      <div className="p-8 text-center space-y-4">
+        <h1 className="text-3xl font-bold">
+          You must be signed in to view your raffles
+        </h1>
+        <p className="text-lg text-dark">
+          Connect your wallet to manage your raffles and prizes.
+        </p>
+      </div>
+    );
+  }
+
+  if (raffles.length === 0) {
+    return (
+      <div className="p-8 text-center space-y-4">
+        <h1 className="text-3xl font-bold mb-4">My Raffles</h1>
+        <p className="text-muted">You have not created any raffles yet.</p>
+        <Link
+          href="/create-raffle"
+          className="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-black font-semibold rounded-md transition"
+        >
+          Create Raffle
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-dark text-light px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-center text-primary">
-        My Raffles
-      </h1>
+    <div className="p-8 space-y-8">
+      <h1 className="text-3xl font-bold mb-6">My Raffles</h1>
 
-      <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {mockMyRaffles.map((raffle) => (
-          <div
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {raffles.map((raffle) => (
+          <Link
             key={raffle.id}
-            className="bg-light rounded-xl overflow-hidden shadow-md hover:shadow-secondary/40 transition"
+            href={`/raffles/${raffle.id}`}
+            className="border border-muted rounded-xl overflow-hidden shadow-lg bg-light flex flex-col hover:scale-105 transform transition duration-300"
           >
-            <img
-              src={raffle.image}
-              alt={raffle.title}
-              className="w-full h-56 object-cover"
-            />
-            <div className="p-4 text-mid">
-              <h2 className="text-xl font-semibold mb-2 text-dark">
-                {raffle.title}
-              </h2>
-              <p className="mb-3">{getStatusBadge(raffle.status)}</p>
+            {raffle.imageUrl && (
+              <img
+                src={raffle.imageUrl}
+                alt={raffle.title}
+                className="h-48 w-full object-cover"
+              />
+            )}
+            <div className="p-4 flex flex-col flex-grow space-y-2">
+              <h2 className="text-xl font-bold">{raffle.title}</h2>
 
-              {raffle.status === "won" && (
-                <button className="w-full bg-secondary hover:bg-primary text-light px-4 py-2 rounded-lg font-semibold transition">
-                  🎁 Claim Prize
-                </button>
-              )}
+              <div className="text-mid text-sm">
+                🎟️ {raffle.ticketsSold}/{raffle.ticketSupply} tickets sold
+              </div>
 
-              {raffle.status === "pending" && (
-                <button
-                  disabled
-                  className="w-full bg-muted text-mid px-4 py-2 rounded-lg font-semibold opacity-50 cursor-not-allowed"
-                >
-                  Waiting...
-                </button>
-              )}
+              <div className="text-mid text-sm">
+                🪙 {raffle.priceEth} ETH per ticket
+              </div>
 
-              {raffle.status === "lost" && (
-                <button
-                  disabled
-                  className="w-full bg-muted text-mid px-4 py-2 rounded-lg font-semibold opacity-50 cursor-default"
-                >
-                  Better Luck Next Time
-                </button>
-              )}
+              <div className="text-mid text-sm break-all">
+                👤{" "}
+                {raffle.owner?.address
+                  ? shortenAddress(raffle.owner.address)
+                  : "Unknown"}
+              </div>
+
+              <div className="text-sm text-muted mt-auto">
+                {raffle.isActive
+                  ? raffle.endsAt
+                    ? `⏰ Ends: ${new Date(raffle.endsAt).toLocaleString()}`
+                    : "Ongoing"
+                  : "Ended"}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
   );
+}
+
+function shortenAddress(addr: string) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
