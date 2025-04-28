@@ -1,26 +1,18 @@
+/* Tell PostCSS to run the Tailwind plugin: */
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* (Optional) Load your JS config so your color palette ends up in the build: */
+/* 2) Load your project’s tailwind.config.js so your custom colors get generated */
+@config "../../tailwind.config.js";
+/* (Optional) If you want to override or extend via CSS variables instead:
+@theme {
+  --color-dark:      #0D0F1A;
+  --color-light:     #F0F3F8;
+  --color-muted:     #CBD5E1;
+  --color-mid:       #475569;
+  --color-primary:   #ADEBB3;
+  --color-secondary: #59D99D;
 }
+*/
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* Nothing else here—no @tailwind base/components/utilities, no overrides */

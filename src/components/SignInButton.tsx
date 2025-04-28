@@ -42,7 +42,7 @@ export default function SignInButton() {
       <button
         onClick={signIn}
         disabled={isSigningIn}
-        className="bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition disabled:opacity-50"
+        className="bg-primary text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition disabled:opacity-50"
       >
         {isSigningIn ? "Signing..." : "Sign In"}
       </button>

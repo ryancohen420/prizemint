@@ -24,11 +24,13 @@ const mockMyRaffles = [
 function getStatusBadge(status: string) {
   switch (status) {
     case "pending":
-      return <span className="text-yellow-400">⏳ Awaiting Draw</span>;
+      return (
+        <span className="text-secondary font-semibold">⏳ Awaiting Draw</span>
+      );
     case "won":
-      return <span className="text-green-400 font-semibold">🏆 You Won!</span>;
+      return <span className="text-secondary font-semibold">🏆 You Won!</span>;
     case "lost":
-      return <span className="text-gray-400">❌ Not Won</span>;
+      return <span className="text-dark">❌ Not Won</span>;
     default:
       return null;
   }
@@ -36,8 +38,8 @@ function getStatusBadge(status: string) {
 
 export default function MyRaffles() {
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-6 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-center text-green-400">
+    <div className="min-h-screen bg-dark text-light px-6 py-10">
+      <h1 className="text-3xl font-bold mb-8 text-center text-primary">
         My Raffles
       </h1>
 
@@ -45,27 +47,29 @@ export default function MyRaffles() {
         {mockMyRaffles.map((raffle) => (
           <div
             key={raffle.id}
-            className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-green-400/40 transition"
+            className="bg-light rounded-xl overflow-hidden shadow-md hover:shadow-secondary/40 transition"
           >
             <img
               src={raffle.image}
               alt={raffle.title}
               className="w-full h-56 object-cover"
             />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">{raffle.title}</h2>
+            <div className="p-4 text-mid">
+              <h2 className="text-xl font-semibold mb-2 text-dark">
+                {raffle.title}
+              </h2>
               <p className="mb-3">{getStatusBadge(raffle.status)}</p>
 
               {raffle.status === "won" && (
-                <button className="w-full bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition">
+                <button className="w-full bg-secondary hover:bg-primary text-light px-4 py-2 rounded-lg font-semibold transition">
                   🎁 Claim Prize
                 </button>
               )}
 
               {raffle.status === "pending" && (
                 <button
-                  className="w-full bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold cursor-not-allowed"
                   disabled
+                  className="w-full bg-muted text-mid px-4 py-2 rounded-lg font-semibold opacity-50 cursor-not-allowed"
                 >
                   Waiting...
                 </button>
@@ -73,8 +77,8 @@ export default function MyRaffles() {
 
               {raffle.status === "lost" && (
                 <button
-                  className="w-full bg-gray-700 text-gray-300 px-4 py-2 rounded-lg font-semibold cursor-default"
                   disabled
+                  className="w-full bg-muted text-mid px-4 py-2 rounded-lg font-semibold opacity-50 cursor-default"
                 >
                   Better Luck Next Time
                 </button>
