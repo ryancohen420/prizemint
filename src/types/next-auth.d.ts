@@ -1,28 +1,39 @@
 // src/types/next-auth.d.ts
 
-import { JWT as DefaultJWT } from "next-auth/jwt";
+import { DefaultSession, DefaultUser } from "next-auth"
+import { JWT as DefaultJWT }       from "next-auth/jwt"
 
+// — extend the core Session type —
 declare module "next-auth" {
-  interface Session {
-    address?: string;
-    user?: {
-      id: string;
-      address: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-    };
+  interface Session extends DefaultSession {
+    user?: DefaultSession["user"] & {
+      id:       string
+      address:  string
+      username?: string | null
+    }
   }
 
-  interface User {
-    id: string;
-    address: string;
+  // when you consume `user` in callbacks, it will be DefaultUser + these
+  interface User extends DefaultUser {
+    id:       string
+    address:  string
+    username?: string | null
   }
 }
 
+// — extend the JWT payload type —
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
-    sub?: string;
-    address?: string;
+    address?:  string
+    username?: string | null
+  }
+}
+
+// — extend the AdapterUser that PrismaAdapter returns —
+declare module "next-auth/adapters" {
+  interface AdapterUser extends DefaultUser {
+    id:       string
+    address:  string
+    username?: string | null
   }
 }

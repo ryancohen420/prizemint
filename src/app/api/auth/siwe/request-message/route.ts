@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SiweMessage } from "siwe";
+import { SiweMessage }             from "siwe";
+import prisma                      from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
     const { address, chainId } = await req.json();
-
     if (!address || !chainId) {
       return NextResponse.json(
         { error: "Missing address or chainId" },
@@ -13,8 +13,13 @@ export async function POST(req: NextRequest) {
     }
 
     const domain = req.headers.get("host") || "localhost:3000";
-    const uri = req.nextUrl.origin;
-    const nonce = Math.random().toString(36).substring(2, 10); // 8-char alphanumeric
+    const uri    = req.nextUrl.origin;
+    const nonce  = Math.random().toString(36).substring(2, 10);
+
+    // Persist the nonce so authorize() can verify it later
+    await prisma.nonce.create({
+      data: { id: nonce, value: nonce },
+    });
 
     const siweFields = {
       domain,
@@ -27,20 +32,13 @@ export async function POST(req: NextRequest) {
     };
 
     console.log("✅ Constructing SIWE message with:", siweFields);
-
     const message = new SiweMessage(siweFields).prepareMessage();
-
-
     return NextResponse.json({ message });
   } catch (error: unknown) {
-    const errMsg =
-      error instanceof Error ? error.message : "Unknown error";
+    const errMsg = error instanceof Error ? error.message : "Unknown error";
     console.error("❌ Error generating SIWE message:", errMsg);
     return NextResponse.json(
-      {
-        error: "Failed to generate SIWE message",
-        detail: errMsg,
-      },
+      { error: "Failed to generate SIWE message", detail: errMsg },
       { status: 500 }
     );
   }

@@ -1,10 +1,15 @@
+// src/components/NavBar.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react"; // ← new
 import SignInButton from "./SignInButton";
 
 export default function NavBar() {
+  const { data: session, status } = useSession(); // ← new
+  const signedIn = status === "authenticated"; // ← new
+
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +46,11 @@ export default function NavBar() {
         <Link href="/my-raffles" className="hover:text-primary transition">
           My Raffles
         </Link>
+        {signedIn && (
+          <Link href="/profile" className="hover:text-primary transition">
+            Profile
+          </Link>
+        )}
       </div>
 
       {/* Right Side */}
@@ -84,6 +94,15 @@ export default function NavBar() {
           >
             My Raffles
           </Link>
+          {signedIn && (
+            <Link
+              href="/profile"
+              className="hover:text-primary transition"
+              onClick={() => setMenuOpen(false)}
+            >
+              Profile
+            </Link>
+          )}
         </nav>
       </div>
     </nav>

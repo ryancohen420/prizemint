@@ -1,5 +1,3 @@
-// Updated schema.prisma with optional ownerId on Raffle
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,23 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// A user who signs in with Ethereum (SIWE)
 model User {
-  id            String   @id @default(uuid())
-  address       String   @unique
-  createdAt     DateTime @default(now())
-  lastLogin     DateTime @updatedAt
-  raffles       Raffle[] // optional relationship
+  id        String    @id @default(cuid())
+  address   String    @unique
+  username  String?   @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  raffles   Raffle[]
 }
 
-model Raffle {
-  id            String   @id @default(uuid())
-  title         String
-  description   String
-  imageUrl      String
-  priceEth      Float
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
+/// Store nonces for SIWE message verification
+model Nonce {
+  id        String   @id        // the SIWE nonce value
+  value     String               // optional extra data
+  createdAt DateTime @default(now())
+}
 
-  ownerId       String?    // made optional
-  owner         User?      @relation(fields: [ownerId], references: [id])
+/// A collectible raffle
+model Raffle {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String
+  priceEth    Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  ownerId     String?
+  owner       User?    @relation(fields: [ownerId], references: [id])
 }
