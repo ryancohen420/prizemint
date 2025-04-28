@@ -2,7 +2,8 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Link from "next/link"; // ✅ ADD THIS
+import Link from "next/link";
+import SignInButton from "@/components/SignInButton"; // <-- Adjust path if needed
 
 type Raffle = {
   id: string;
@@ -21,7 +22,7 @@ type Raffle = {
 };
 
 export default function MyRafflesPage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
   const signedIn = status === "authenticated";
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,28 +40,35 @@ export default function MyRafflesPage() {
       });
   }, [signedIn]);
 
-  if (status === "loading" || loading) {
-    return <div className="p-8">Loading...</div>;
+  if (status === "loading" || (signedIn && loading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-light">
+        Loading...
+      </div>
+    );
   }
 
-  if (!signedIn) {
+  if (status === "unauthenticated" || !session) {
     return (
-      <div className="p-8 text-center space-y-4">
-        <h1 className="text-3xl font-bold">
-          You must be signed in to view your raffles
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 text-light space-y-6">
+        <h1 className="text-3xl font-bold text-center">
+          You must connect your wallet
         </h1>
-        <p className="text-lg text-dark">
-          Connect your wallet to manage your raffles and prizes.
+        <p className="text-lg text-dark text-center">
+          Sign in with Ethereum to view and manage your raffles.
         </p>
+        <SignInButton />
       </div>
     );
   }
 
   if (raffles.length === 0) {
     return (
-      <div className="p-8 text-center space-y-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 text-light space-y-6">
         <h1 className="text-3xl font-bold mb-4">My Raffles</h1>
-        <p className="text-muted">You have not created any raffles yet.</p>
+        <p className="text-muted text-center">
+          You have not created any raffles yet.
+        </p>
         <Link
           href="/create-raffle"
           className="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-black font-semibold rounded-md transition"

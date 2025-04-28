@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link"; // ✅ ADD THIS
+import Link from "next/link";
 
 type Raffle = {
   id: string;
@@ -27,7 +27,11 @@ export default function MarketplacePage() {
     fetch("/api/raffles")
       .then((res) => res.json())
       .then((data) => {
-        setRaffles(data || []);
+        if (Array.isArray(data)) {
+          setRaffles(data);
+        } else {
+          setRaffles([]); // fallback if API error or wrong type
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -36,7 +40,7 @@ export default function MarketplacePage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8">Loading raffles…</div>;
+    return <div className="p-8 text-light">Loading raffles…</div>;
   }
 
   if (raffles.length === 0) {
