@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import SignInButton from "@/components/SignInButton"; // <-- Adjust path if needed
 
 type Raffle = {
   id: string;
@@ -22,17 +21,21 @@ type Raffle = {
 };
 
 export default function MyRafflesPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession(); // 🔥 only status, no session
   const signedIn = status === "authenticated";
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!signedIn) return;
-    fetch("/api/raffles/mine")
+    fetch("/api/raffles/my")
       .then((res) => res.json())
       .then((data) => {
-        setRaffles(data || []);
+        if (Array.isArray(data)) {
+          setRaffles(data);
+        } else {
+          setRaffles([]);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -40,40 +43,71 @@ export default function MyRafflesPage() {
       });
   }, [signedIn]);
 
-  if (status === "loading" || (signedIn && loading)) {
+  if (status === "loading") {
+    return <div className="p-8 text-light">Checking authentication...</div>;
+  }
+
+  if (!signedIn) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-light">
-        Loading...
+      <div className="p-8 flex flex-col items-center text-center space-y-8">
+        <div className="text-6xl">🔐</div>
+
+        <h1 className="text-4xl font-bold text-primary">Connect Your Wallet</h1>
+
+        <p className="text-light text-md max-w-md">
+          To view and manage your raffles, please connect your Ethereum wallet.
+          <br />
+          New to Web3? Download a wallet app to get started!
+        </p>
+
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <a
+            href="https://apps.apple.com/app/apple-store/id1457119021"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition"
+          >
+            <img
+              src="/badges/appstore.svg"
+              alt="Download on the App Store"
+              className="h-12 sm:h-14 w-auto object-contain"
+            />
+          </a>
+          <a
+            href="https://play.google.com/store/apps/details?id=me.rainbow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition"
+          >
+            <img
+              src="/badges/googleplay.png"
+              alt="Get it on Google Play"
+              className="h-12 sm:h-14 w-auto object-contain"
+            />
+          </a>
+        </div>
+
+        <p className="text-muted text-sm mt-4 max-w-xs">
+          After installing, come back and connect your wallet!
+        </p>
       </div>
     );
   }
 
-  if (status === "unauthenticated" || !session) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 text-light space-y-6">
-        <h1 className="text-3xl font-bold text-center">
-          You must connect your wallet
-        </h1>
-        <p className="text-lg text-dark text-center">
-          Sign in with Ethereum to view and manage your raffles.
-        </p>
-        <SignInButton />
-      </div>
-    );
+  if (loading) {
+    return <div className="p-8 text-light">Loading your raffles…</div>;
   }
 
   if (raffles.length === 0) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 text-light space-y-6">
-        <h1 className="text-3xl font-bold mb-4">My Raffles</h1>
-        <p className="text-muted text-center">
-          You have not created any raffles yet.
-        </p>
+      <div className="p-8 text-center space-y-6">
+        <h1 className="text-3xl font-bold text-primary">My Raffles</h1>
+        <p className="text-light">{"You haven't created any raffles yet."}</p>
         <Link
           href="/create-raffle"
-          className="inline-block mt-4 px-6 py-2 bg-primary hover:bg-secondary text-black font-semibold rounded-md transition"
+          className="inline-block mt-6 bg-primary text-black font-semibold px-6 py-3 rounded-lg hover:bg-green-500 transition"
         >
-          Create Raffle
+          Create Your First Raffle
         </Link>
       </div>
     );
