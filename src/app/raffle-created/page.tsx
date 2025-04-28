@@ -1,14 +1,32 @@
 "use client";
 
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Confetti from "react-confetti";
 
-export default function RaffleCreatedPage() {
+function RaffleCreatedContent() {
   const searchParams = useSearchParams();
   const raffleId = searchParams.get("id");
 
+  const [showConfetti, setShowConfetti] = useState(true);
+  const [mounted, setMounted] = useState(false); // <== NEW
+
+  useEffect(() => {
+    setMounted(true); // Now we know it's on client side
+    const timeout = setTimeout(() => {
+      setShowConfetti(false);
+    }, 10000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-dark text-light p-8 space-y-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-dark text-light p-8 space-y-6 relative">
+      {mounted && showConfetti && (
+        <Confetti width={window.innerWidth} height={window.innerHeight} />
+      )}
+
       <h1 className="text-4xl font-bold text-primary">🎉 Raffle Created!</h1>
 
       <p className="text-center text-lg">
@@ -17,7 +35,13 @@ export default function RaffleCreatedPage() {
 
       {raffleId && (
         <p className="text-center text-muted text-sm">
-          Raffle ID: <span className="font-mono">{raffleId}</span>
+          View your raffle:{" "}
+          <Link
+            href={`/raffles/${raffleId}`}
+            className="underline hover:text-primary"
+          >
+            {raffleId}
+          </Link>
         </p>
       )}
 
@@ -37,5 +61,15 @@ export default function RaffleCreatedPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function RaffleCreatedPage() {
+  return (
+    <Suspense
+      fallback={<div className="text-light p-8">Loading raffle...</div>}
+    >
+      <RaffleCreatedContent />
+    </Suspense>
   );
 }

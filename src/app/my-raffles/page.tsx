@@ -21,7 +21,7 @@ type Raffle = {
 };
 
 export default function MyRafflesPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const signedIn = status === "authenticated";
   const [raffles, setRaffles] = useState<Raffle[]>([]);
   const [loading, setLoading] = useState(true);
